@@ -2,9 +2,13 @@
   "type": "Mesh",
   "name": "demo",
   "mtls": {
-    "ca": {
-      "builtin": {}
-    },
-    "enabled": true
+    "enabled": true,
+    "defaultBackend": "builtin-1",
+    "backends": [
+      {
+        "name": "builtin-1",
+        "type": "builtin"
+      }
+    ]
   }
 }

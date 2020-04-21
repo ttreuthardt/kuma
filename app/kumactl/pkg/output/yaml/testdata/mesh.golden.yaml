@@ -1,6 +1,8 @@
 mtls:
-  ca:
-    builtin: {}
+  backends:
+  - name: builtin-1
+    type: builtin
+  defaultBackend: builtin-1
   enabled: true
 name: demo
 type: Mesh

@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	mesh_proto "github.com/Kong/kuma/api/mesh/v1alpha1"
 	"github.com/Kong/kuma/app/kumactl/pkg/output"
 	"github.com/Kong/kuma/app/kumactl/pkg/output/printers"
 	"github.com/Kong/kuma/pkg/core/resources/apis/mesh"
@@ -58,14 +57,9 @@ func printMeshes(meshes []*mesh.MeshResource, out io.Writer) error {
 				mesh := meshes[i]
 
 				mtls := "off"
-				if mesh.Spec.Mtls.GetEnabled() {
-					switch mesh.Spec.GetMtls().GetCa().GetType().(type) {
-					case *mesh_proto.CertificateAuthority_Provided_:
-						mtls = "provided"
-					case *mesh_proto.CertificateAuthority_Builtin_:
-						mtls = "builtin"
-					}
-				}
+				//if mesh.Spec.Mtls.GetEnabled() {
+				// todo establish what is the format
+				//}
 
 				metrics := "off"
 				switch {
