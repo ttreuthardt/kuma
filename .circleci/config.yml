@@ -331,7 +331,7 @@ jobs:
           make dev/tools
     - run:
         name: "Run integration tests"
-        command: | 
+        command: |
           export PATH=$HOME/go/bin:$PATH
           make integration
     - store_artifacts:
@@ -490,9 +490,9 @@ jobs:
     - run:
         name: Deploy example setup for traffic routing
         command: make deploy/traffic-routing/minikube
-    - run:
-        name: Verify traffic routing without mTLS
-        command: make verify/traffic-routing/minikube/without-mtls
+#    - run:
+#        name: Verify traffic routing without mTLS
+#        command: make verify/traffic-routing/minikube/without-mtls
     - run:
         name: Verify traffic routing with mTLS
         command: make verify/traffic-routing/minikube/with-mtls

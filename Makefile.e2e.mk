@@ -122,6 +122,10 @@ define envoy_active_mtls_clusters_count
 	| jq -s ". | length"
 endef
 
+define envoy_certificates_count
+	curl -s localhost:9901/certs | jq ".certificates[]" | jq -s ". | length"
+endef
+
 define verify_example_inbound
 	@echo "Checking number of Inbound requests via Envoy ..."
 	test $$( $(1) \
@@ -243,6 +247,7 @@ wait/traffic-routing/docker-compose/mtls: ## Docker Compose: Wait until incoming
 	@echo
 	$(call docker_compose) exec kuma-example-web sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_listeners_count,inbound,6060) ) -eq 1 ]]; then echo "listener has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: listener has not been configured for mTLS" ; exit 1'
 	$(call docker_compose) exec kuma-example-web sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_clusters_count,kuma-example-backend) ) -eq 1 ]]; then echo "cluster has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: cluster has not been configured for mTLS" ; exit 1'
+	$(call docker_compose) exec kuma-example-web sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_certificates_count) ) -gt 1 ]]; then echo "Certificates received from SDS "; exit 0; fi; sleep 1; done; echo -e "\nError: certificates were not received from SDS" ; exit 1'
 
 apply/traffic-routing/docker-compose/no-mtls: ## Docker Compose: disable mTLS
 	@echo
@@ -340,6 +345,7 @@ wait/example/minikube: ## Minikube: Wait for demo setup to get ready
 wait/example/minikube/mtls: ## Minikube: Wait until incoming Listener and outgoing Cluster have been configured for mTLS
 	$(call kubectl_exec,kuma-demo,demo-client,demo-client) sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_listeners_count,inbound,3000) ) -eq 1 ]]; then echo "listener has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: listener has not been configured for mTLS" ; exit 1'
 	$(call kubectl_exec,kuma-demo,demo-client,demo-client) sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_clusters_count,demo-app.kuma-demo.svc:8000) ) -eq 1 ]]; then echo "cluster has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: cluster has not been configured for mTLS" ; exit 1'
+	$(call kubectl_exec,kuma-demo,demo-client,demo-client) sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_certificates_count) ) -gt 1 ]]; then echo "Certificates received from SDS "; exit 0; fi; sleep 1; done; echo -e "\nError: certificates were not received from SDS" ; exit 1'
 
 curl/example/minikube: ## Minikube: Make sample requests to demo setup
 	$(call kubectl_exec,kuma-demo,demo-client,demo-client) $(call curl_example_client)
@@ -412,6 +418,7 @@ wait/traffic-routing/minikube/mtls: ## Minikube: Wait until incoming Listener an
 	@echo
 	$(call kubectl_exec,kuma-example,kuma-example-web,kuma-example-web) sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_listeners_count,inbound,6060) ) -eq 1 ]]; then echo "listener has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: listener has not been configured for mTLS" ; exit 1'
 	$(call kubectl_exec,kuma-example,kuma-example-web,kuma-example-web) sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_active_mtls_clusters_count,kuma-example-backend.kuma-example.svc:7070) ) -eq 1 ]]; then echo "cluster has been configured for mTLS "; exit 0; fi; sleep 1; done; echo -e "\nError: cluster has not been configured for mTLS" ; exit 1'
+	$(call kubectl_exec,kuma-example,kuma-example-web,kuma-example-web) sh -c 'for i in `seq 1 10`; do echo -n "try #$$i: " ; if [[ $$( $(call envoy_certificates_count) ) -gt 1 ]]; then echo "Certificates received from SDS "; exit 0; fi; sleep 1; done; echo -e "\nError: certificates were not received from SDS" ; exit 1'
 
 apply/traffic-routing/minikube/no-mtls: ## Minikube: disable mTLS
 	@echo
