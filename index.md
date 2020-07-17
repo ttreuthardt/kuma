@@ -1,0 +1,19 @@
+# Kuma Helm Repository
+
+![Kuma](https://kuma.io/images/brand/kuma-logo-new.svg)
+
+## Add the Kuma Helm repository
+
+```sh
+helm repo add kuma https://kumahq.github.io/kuma
+```
+
+## Install Kuma
+
+```sh
+helm upgrade -i kuma kuma/kuma
+```
+
+## License
+
+[Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0)
