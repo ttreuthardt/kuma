@@ -8,7 +8,7 @@
 helm repo add kuma https://kumahq.github.io/kuma
 ```
 
-## Install Kuma
+## Install Kuma with Helm
 
 ```sh
 helm upgrade -i kuma kuma/kuma
