@@ -18,7 +18,7 @@ The process to release a Kuma version is as follows:
 
 ### Patch releases
 
-After the initial release there may be a need for a patch release `A.B.1`, `A.B.2` and so on. These typically include only fixes to critical issues, but there might be exceptions where features are backported from master. I most cases the patch releases follow a lighter weight release procedure, without `rc` versions and a testing/verification cycle focused on the chanaged/fixed functionalities.  
+After the initial release, there may be a need for a patch release `A.B.1`, `A.B.2`, and so on. These typically include only fixes to critical issues, but there might be exceptions where features are backported from master. In most cases, the patch releases follow a lighter weight release procedure, without `rc` versions and a testing/verification cycle focused on the changed/fixed functionalities.
 
 # Release Checklist
 
@@ -31,9 +31,9 @@ To release a new version of Kuma follow these steps:
 - [ ] Create a new Git tag for the release.
 - [ ] Push the Git tag. This will trigger the release job on CI.
 - [ ] Make sure the new binaries are available in [Bintray](https://bintray.com/kong/kuma).
-- [ ] Download the new Kuma version and double-check that it works with the demo app. Check that is works both in `universal` and `kubernetes` modes.
+- [ ] Download the new Kuma version and double-check that it works with the demo app. Check that is works both in `Universal` and `Kubernetes` modes.
 - [ ] Merge PR to website repository.
-- [ ] Create a new [Github release](https://github.com/kumahq/kuma/releases) and create a link to both the changelog and to the assets download.
+- [ ] Create a new [Github release](https://github.com/kumahq/kuma/releases) and create a link to both the changelog and the assets download.
 - [ ] Update the `kumactl` formula in [`brew`](https://github.com/Homebrew/homebrew-core/blob/master/Formula/kumactl.rb)
 - [ ] Create a blog post that describes the most important features of the release, linking to the `CHANGELOG.md`, and including the download links.
 - [ ] Review and approve the blog post.
