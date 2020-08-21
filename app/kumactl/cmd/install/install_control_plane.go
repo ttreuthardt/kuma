@@ -24,28 +24,28 @@ var (
 )
 
 type InstallControlPlaneArgs struct {
-	Namespace               string
-	ImagePullPolicy         string
-	ControlPlaneVersion     string
-	ControlPlaneImage       string
-	ControlPlaneServiceName string
-	ControlPlaneSecrets     []ImageEnvSecret
-	AdmissionServerTlsCert  string
-	AdmissionServerTlsKey   string
-	InjectorFailurePolicy   string
-	DataplaneImage          string
-	DataplaneInitImage      string
-	SdsTlsCert              string
-	SdsTlsKey               string
-	KdsTlsCert              string
-	KdsTlsKey               string
-	KdsGlobalAddress        string
-	CNIEnabled              bool
-	CNIImage                string
-	CNIVersion              string
-	KumaCpMode              string
-	Zone                    string
-	GlobalRemotePortType    string
+	Release_Namespace                    string
+	Values_controlPlane_image_pullPolicy string
+	Values_controlPlane_image_tag        string
+	Values_controlPlane_image_repositry  string
+	ControlPlaneServiceName              string
+	ControlPlaneSecrets                  []ImageEnvSecret
+	AdmissionServerTlsCert               string
+	AdmissionServerTlsKey                string
+	InjectorFailurePolicy                string
+	DataplaneImage                       string
+	DataplaneInitImage                   string
+	SdsTlsCert                           string
+	SdsTlsKey                            string
+	KdsTlsCert                           string
+	KdsTlsKey                            string
+	KdsGlobalAddress                     string
+	CNIEnabled                           bool
+	CNIImage                             string
+	CNIVersion                           string
+	KumaCpMode                           string
+	Zone                                 string
+	GlobalRemotePortType                 string
 }
 
 type ImageEnvSecret struct {
@@ -55,23 +55,23 @@ type ImageEnvSecret struct {
 }
 
 var DefaultInstallControlPlaneArgs = InstallControlPlaneArgs{
-	Namespace:               "kuma-system",
-	ImagePullPolicy:         "IfNotPresent",
-	ControlPlaneVersion:     kuma_version.Build.Version,
-	ControlPlaneImage:       "kong-docker-kuma-docker.bintray.io/kuma-cp",
-	ControlPlaneServiceName: "kuma-control-plane",
-	AdmissionServerTlsCert:  "",
-	AdmissionServerTlsKey:   "",
-	InjectorFailurePolicy:   "Ignore",
-	DataplaneImage:          "kong-docker-kuma-docker.bintray.io/kuma-dp",
-	DataplaneInitImage:      "kong-docker-kuma-docker.bintray.io/kuma-init",
-	SdsTlsCert:              "",
-	SdsTlsKey:               "",
-	CNIImage:                "lobkovilya/install-cni",
-	CNIVersion:              "0.0.1",
-	KumaCpMode:              core.Standalone,
-	Zone:                    "",
-	GlobalRemotePortType:    "LoadBalancer",
+	Release_Namespace:                    "kuma-system",
+	Values_controlPlane_image_pullPolicy: "IfNotPresent",
+	Values_controlPlane_image_tag:        kuma_version.Build.Version,
+	Values_controlPlane_image_repositry:  "kong-docker-kuma-docker.bintray.io/kuma-cp",
+	ControlPlaneServiceName:              "kuma-control-plane",
+	AdmissionServerTlsCert:               "",
+	AdmissionServerTlsKey:                "",
+	InjectorFailurePolicy:                "Ignore",
+	DataplaneImage:                       "kong-docker-kuma-docker.bintray.io/kuma-dp",
+	DataplaneInitImage:                   "kong-docker-kuma-docker.bintray.io/kuma-init",
+	SdsTlsCert:                           "",
+	SdsTlsKey:                            "",
+	CNIImage:                             "lobkovilya/install-cni",
+	CNIVersion:                           "0.0.1",
+	KumaCpMode:                           core.Standalone,
+	Zone:                                 "",
+	GlobalRemotePortType:                 "LoadBalancer",
 }
 
 var InstallCpTemplateFilesFn = InstallCpTemplateFiles
@@ -101,9 +101,9 @@ func newInstallControlPlaneCmd(pctx *kumactl_cmd.RootContext) *cobra.Command {
 				return errors.Wrap(err, "Failed to read template files")
 			}
 
-			renderedFiles, err := renderFiles(templateFiles, args, simpleTemplateRenderer)
+			renderedFiles, err := renderHelmFiles(templateFiles, args)
 			if err != nil {
-				return errors.Wrap(err, "Failed to render template files")
+				return errors.Wrap(err, "Failed to render helm template files")
 			}
 
 			sortedResources := k8s.SortResourcesByKind(renderedFiles)
@@ -118,10 +118,10 @@ func newInstallControlPlaneCmd(pctx *kumactl_cmd.RootContext) *cobra.Command {
 		},
 	}
 	// flags
-	cmd.Flags().StringVar(&args.Namespace, "namespace", args.Namespace, "namespace to install Kuma Control Plane to")
-	cmd.Flags().StringVar(&args.ImagePullPolicy, "image-pull-policy", args.ImagePullPolicy, "image pull policy that applies to all components of the Kuma Control Plane")
-	cmd.Flags().StringVar(&args.ControlPlaneVersion, "control-plane-version", args.ControlPlaneVersion, "version shared by all components of the Kuma Control Plane")
-	cmd.Flags().StringVar(&args.ControlPlaneImage, "control-plane-image", args.ControlPlaneImage, "image of the Kuma Control Plane component")
+	cmd.Flags().StringVar(&args.Release_Namespace, "namespace", args.Release_Namespace, "namespace to install Kuma Control Plane to")
+	cmd.Flags().StringVar(&args.Values_controlPlane_image_pullPolicy, "image-pull-policy", args.Values_controlPlane_image_pullPolicy, "image pull policy that applies to all components of the Kuma Control Plane")
+	cmd.Flags().StringVar(&args.Values_controlPlane_image_tag, "control-plane-version", args.Values_controlPlane_image_tag, "version shared by all components of the Kuma Control Plane")
+	cmd.Flags().StringVar(&args.Values_controlPlane_image_repositry, "control-plane-image", args.Values_controlPlane_image_repositry, "image of the Kuma Control Plane component")
 	cmd.Flags().StringVar(&args.ControlPlaneServiceName, "control-plane-service-name", args.ControlPlaneServiceName, "Service name of the Kuma Control Plane")
 	cmd.Flags().StringVar(&args.AdmissionServerTlsCert, "admission-server-tls-cert", args.AdmissionServerTlsCert, "TLS certificate for the admission web hooks implemented by the Kuma Control Plane")
 	cmd.Flags().StringVar(&args.AdmissionServerTlsKey, "admission-server-tls-key", args.AdmissionServerTlsKey, "TLS key for the admission web hooks implemented by the Kuma Control Plane")
@@ -178,7 +178,7 @@ func validateArgs(args InstallControlPlaneArgs) error {
 
 func autogenerateCerts(args *InstallControlPlaneArgs) error {
 	if args.AdmissionServerTlsCert == "" && args.AdmissionServerTlsKey == "" {
-		fqdn := fmt.Sprintf("%s.%s.svc", args.ControlPlaneServiceName, args.Namespace)
+		fqdn := fmt.Sprintf("%s.%s.svc", args.ControlPlaneServiceName, args.Release_Namespace)
 		// notice that Kubernetes doesn't requires DNS SAN in a X509 cert of a WebHook
 		admissionCert, err := NewSelfSignedCert(fqdn, tls.ServerCertType)
 		if err != nil {
@@ -189,10 +189,10 @@ func autogenerateCerts(args *InstallControlPlaneArgs) error {
 	}
 
 	if args.SdsTlsCert == "" && args.SdsTlsKey == "" {
-		fqdn := fmt.Sprintf("%s.%s.svc", args.ControlPlaneServiceName, args.Namespace)
+		fqdn := fmt.Sprintf("%s.%s.svc", args.ControlPlaneServiceName, args.Release_Namespace)
 		hosts := []string{
 			fqdn,
-			fmt.Sprintf("%s.%s", args.ControlPlaneServiceName, args.Namespace),
+			fmt.Sprintf("%s.%s", args.ControlPlaneServiceName, args.Release_Namespace),
 			args.ControlPlaneServiceName,
 			"localhost",
 		}
@@ -206,7 +206,7 @@ func autogenerateCerts(args *InstallControlPlaneArgs) error {
 	}
 
 	if args.KdsTlsCert == "" && args.KdsTlsKey == "" {
-		fqdn := fmt.Sprintf("%s.%s.svc", args.ControlPlaneServiceName, args.Namespace)
+		fqdn := fmt.Sprintf("%s.%s.svc", args.ControlPlaneServiceName, args.Release_Namespace)
 		hosts := []string{
 			fqdn,
 			"localhost",
@@ -222,7 +222,7 @@ func autogenerateCerts(args *InstallControlPlaneArgs) error {
 }
 
 func InstallCpTemplateFiles(args InstallControlPlaneArgs) (data.FileList, error) {
-	templateFiles, err := data.ReadFiles(controlplane.Templates)
+	templateFiles, err := data.ReadFiles(controlplane.HelmTemplates)
 	if err != nil {
 		return nil, err
 	}

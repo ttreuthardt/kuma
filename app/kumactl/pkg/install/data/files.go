@@ -15,6 +15,7 @@ type FileList []File
 type File struct {
 	Data []byte
 	Name string
+	FullPath string
 }
 
 func (f File) String() string {
@@ -36,6 +37,7 @@ func ReadFiles(fs http.FileSystem) (FileList, error) {
 			file := File{
 				Data: data,
 				Name: fi.Name(),
+				FullPath: path,
 			}
 			files = append(files, file)
 		}
